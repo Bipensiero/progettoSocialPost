@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SocialPost Card Example</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+
+    <style>
+        .customCard {
+            width: 30%;
+            margin: 10px;
+            min-width: 200px !important;
+        }
+    </style>
+</head>
+
+<body class="bg-dark text-light mt-3">
+    <h1 class="container">Post dei nostri utenti</h1>
+    <div class="container">
+        <div class="row text-dark" id="socialPostContainer"></div>
+    </div>
+
+    <div class="container mt-3">
+    <button class="btn btn-primary " onclick="location.href='formPost.html'">Aggiungi post</button>
+    </div>
+
+    <script>
+        // Funzione per caricare i dati dei SocialPost dal database
+        function loadSocialPosts() {
+            // Effettua una richiesta HTTP GET al tuo controller per ottenere i SocialPost
+            fetch('http://localhost:8080/api/posts')
+                .then(response => response.json())
+                .then(data => {
+                    // Chiamata riuscita, elabora i dati ricevuti
+                    renderSocialPosts(data);
+                    console.log(data);
+                })
+                .catch(error => {
+                    // Gestisci eventuali errori durante la richiesta
+                    console.error('Errore durante la richiesta dei SocialPost:', error);
+                });
+        }
+
+        // Funzione per renderizzare i SocialPost sulla pagina HTML
+        function renderSocialPosts(socialPosts) {
+            const container = document.getElementById('socialPostContainer');
+
+            socialPosts.forEach(socialPost => {
+                const card = createSocialPostCard(socialPost);
+                container.appendChild(card);
+            });
+        }
+
+        // Funzione per creare una card HTML per un SocialPost
+        function createSocialPostCard(socialPost) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.classList.add("customCard");
+            card.id = 'card' + socialPost.id;
+
+            const cardBody = document.createElement('div');
+            cardBody.className = 'card-body';
+
+            const author = document.createElement('h5');
+            author.textContent = 'Author: ' + socialPost.author.username;
+
+            const content = document.createElement('p');
+            content.textContent = 'Content: ' + socialPost.content;
+
+            const likes = document.createElement('div');
+            likes.class = "likeContainer";
+            likes.classList.add("mb-3");
+            likes.id = "likeN"+socialPost.id;
+            likes.textContent = socialPost.likes.length + " mi piace";
+
+            const likeButton = document.createElement('button');
+            likeButton.className = 'btn btn-primary';
+            likeButton.textContent = 'Like';
+            likeButton.addEventListener('click', () => {
+                // Funzione per inviare una richiesta POST al tuo controller per aggiungere un like
+                addLikeToSocialPost(socialPost.id);
+            });
+
+            cardBody.appendChild(author);
+            cardBody.appendChild(content);
+            cardBody.appendChild(likes);
+
+            cardBody.appendChild(likeButton);
+
+
+            card.appendChild(cardBody);
+
+            return card;
+        }
+
+        function addLikeToSocialPost(postId) {
+            // Effettua una richiesta HTTP POST al tuo controller per aggiungere un like al SocialPost con l'ID specificato
+            fetch(`http://localhost:8080/api/posts/addLike/${postId}/like/3`, {
+                method: 'PUT'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        // Aggiornamento del like riuscito
+                        console.log('Like aggiunto con successo');
+
+                        updateLikesCount(postId);
+                    } else {
+                        // Gestisci eventuali errori durante l'aggiunta del like
+                        console.error('Errore durante l\'aggiunta del like');
+                    }
+                })
+                .catch(error => {
+                    // Gestisci eventuali errori durante la richiesta
+                    console.error('Errore durante la richiesta di aggiunta del like:', error);
+                });
+        }
+
+        function updateLikesCount(postId) {
+            fetch(`http://localhost:8080/api/posts/${postId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const likesCountElement = document.getElementById(`likeN${postId}`);
+                    likesCountElement.textContent = data.likes.length + " mi piace";
+                })
+        }
+
+        // Carica i dati dei SocialPost quando la pagina viene caricata
+        window.addEventListener('load', () => {
+            loadSocialPosts();
+        });
+
+    </script>
+</body>
+
+</html>
