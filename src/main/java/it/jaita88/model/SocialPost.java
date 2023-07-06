@@ -2,6 +2,8 @@ package it.jaita88.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -26,6 +28,7 @@ public class SocialPost {
 	private UserT author;
 	
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+	@JsonIgnore
 	private List<CommentT> comments;
 	
 	@ManyToMany
