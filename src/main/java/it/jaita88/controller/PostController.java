@@ -119,4 +119,9 @@ public class PostController {
     	
     	return ResponseEntity.ok("Like added successfully");
     }
+    
+//    @GetMapping("/bestPost")
+//    public SocialPost bestPost() {
+//    	return socialPostRepository.mostLikedPost();
+//    }
 }
